@@ -1,0 +1,276 @@
+{
+  "name": "phq9_screening",
+  "remarks": [
+    "PHQ-9 survey during ambulatory visits with cadence + optional DX/meds."
+  ],
+  "states": {
+    "Initial": {
+      "type": "Initial",
+      "direct_transition": "Schedule_Next_Screen"
+    },
+
+    "Schedule_Next_Screen": {
+      "type": "Delay",
+      "range": { "low": 30, "high": 90, "unit": "days" },
+      "direct_transition": "Wellness_Encounter"
+    },
+
+    "Wellness_Encounter": {
+      "type": "Encounter",
+      "encounter_class": "ambulatory",
+      "reason": "185349003",
+      "dispositions": ["Discharge to home"],
+      "duration": { "low": 10, "high": 30, "unit": "minutes" },
+      "direct_transition": "Screening_Gate"
+    },
+
+    "Screening_Gate": {
+      "type": "Simple",
+      "distributed_transition": [
+        { "transition": "PHQ9_Q1", "distribution": 0.45 },
+        { "transition": "Close_Encounter", "distribution": 0.55 }
+      ]
+    },
+
+    "PHQ9_Q1": {
+      "type": "Observation",
+      "category": "survey",
+      "codes": [
+        {
+          "system": "LOINC",
+          "code": "44250-9",
+          "display": "Little interest or pleasure in doing things"
+        }
+      ],
+      "unit": "score",
+      "range": { "low": 0, "high": 3 },
+      "direct_transition": "PHQ9_Q2"
+    },
+    "PHQ9_Q2": {
+      "type": "Observation",
+      "category": "survey",
+      "codes": [
+        {
+          "system": "LOINC",
+          "code": "44255-8",
+          "display": "Feeling down, depressed, or hopeless"
+        }
+      ],
+      "unit": "score",
+      "range": { "low": 0, "high": 3 },
+      "direct_transition": "PHQ9_Q3"
+    },
+    "PHQ9_Q3": {
+      "type": "Observation",
+      "category": "survey",
+      "codes": [
+        {
+          "system": "LOINC",
+          "code": "44259-0",
+          "display": "Trouble falling or staying asleep, or sleeping too much"
+        }
+      ],
+      "unit": "score",
+      "range": { "low": 0, "high": 3 },
+      "direct_transition": "PHQ9_Q4"
+    },
+    "PHQ9_Q4": {
+      "type": "Observation",
+      "category": "survey",
+      "codes": [
+        {
+          "system": "LOINC",
+          "code": "44254-1",
+          "display": "Feeling tired or having little energy"
+        }
+      ],
+      "unit": "score",
+      "range": { "low": 0, "high": 3 },
+      "direct_transition": "PHQ9_Q5"
+    },
+    "PHQ9_Q5": {
+      "type": "Observation",
+      "category": "survey",
+      "codes": [
+        {
+          "system": "LOINC",
+          "code": "44251-7",
+          "display": "Poor appetite or overeating"
+        }
+      ],
+      "unit": "score",
+      "range": { "low": 0, "high": 3 },
+      "direct_transition": "PHQ9_Q6"
+    },
+    "PHQ9_Q6": {
+      "type": "Observation",
+      "category": "survey",
+      "codes": [
+        {
+          "system": "LOINC",
+          "code": "44258-2",
+          "display": "Feeling bad about yourself — or that you are a failure"
+        }
+      ],
+      "unit": "score",
+      "range": { "low": 0, "high": 3 },
+      "direct_transition": "PHQ9_Q7"
+    },
+    "PHQ9_Q7": {
+      "type": "Observation",
+      "category": "survey",
+      "codes": [
+        {
+          "system": "LOINC",
+          "code": "44252-5",
+          "display": "Trouble concentrating on things"
+        }
+      ],
+      "unit": "score",
+      "range": { "low": 0, "high": 3 },
+      "direct_transition": "PHQ9_Q8"
+    },
+    "PHQ9_Q8": {
+      "type": "Observation",
+      "category": "survey",
+      "codes": [
+        {
+          "system": "LOINC",
+          "code": "44253-3",
+          "display": "Moving/speaking slowly or being fidgety/restless"
+        }
+      ],
+      "unit": "score",
+      "range": { "low": 0, "high": 3 },
+      "direct_transition": "PHQ9_Q9"
+    },
+    "PHQ9_Q9": {
+      "type": "Observation",
+      "category": "survey",
+      "codes": [
+        {
+          "system": "LOINC",
+          "code": "44260-8",
+          "display": "Thoughts that you would be better off dead, or of hurting yourself"
+        }
+      ],
+      "unit": "score",
+      "range": { "low": 0, "high": 3 },
+      "direct_transition": "PHQ9_Total"
+    },
+
+    "PHQ9_Total": {
+      "type": "Observation",
+      "category": "survey",
+      "codes": [
+        { "system": "LOINC", "code": "44261-6", "display": "PHQ-9 total score" }
+      ],
+      "unit": "score",
+      "range": { "low": 0, "high": 27 },
+      "direct_transition": "Maybe_Diagnose"
+    },
+
+    "Maybe_Diagnose": {
+      "type": "Simple",
+      "distributed_transition": [
+        { "transition": "Depression_Mild", "distribution": 0.15 },
+        { "transition": "Depression_Moderate", "distribution": 0.1 },
+        { "transition": "Depression_Severe", "distribution": 0.04 },
+        { "transition": "Depression_Severe_WithPsych", "distribution": 0.01 },
+        { "transition": "Close_Encounter", "distribution": 0.7 }
+      ]
+    },
+
+    "Depression_Mild": {
+      "type": "ConditionOnset",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "370143006",
+          "display": "Major depression, single episode, mild"
+        },
+        {
+          "system": "ICD-10-CM",
+          "code": "F32.0",
+          "display": "Major depressive disorder, single episode, mild"
+        }
+      ],
+      "direct_transition": "Maybe_Start_SSRI"
+    },
+    "Depression_Moderate": {
+      "type": "ConditionOnset",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "370143000",
+          "display": "Major depression, single episode, moderate"
+        },
+        {
+          "system": "ICD-10-CM",
+          "code": "F32.1",
+          "display": "Major depressive disorder, single episode, moderate"
+        }
+      ],
+      "direct_transition": "Maybe_Start_SSRI"
+    },
+    "Depression_Severe": {
+      "type": "ConditionOnset",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "370144001",
+          "display": "Major depression, single episode, severe without psychotic features"
+        },
+        {
+          "system": "ICD-10-CM",
+          "code": "F32.2",
+          "display": "Major depressive disorder, single episode, severe without psychotic features"
+        }
+      ],
+      "direct_transition": "Maybe_Start_SSRI"
+    },
+    "Depression_Severe_WithPsych": {
+      "type": "ConditionOnset",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "191610000",
+          "display": "Severe major depression with psychotic features"
+        },
+        {
+          "system": "ICD-10-CM",
+          "code": "F32.3",
+          "display": "Major depressive disorder, single episode, severe with psychotic features"
+        }
+      ],
+      "direct_transition": "Maybe_Start_SSRI"
+    },
+
+    "Maybe_Start_SSRI": {
+      "type": "Simple",
+      "distributed_transition": [
+        { "transition": "Start_SSRI", "distribution": 0.7 },
+        { "transition": "Close_Encounter", "distribution": 0.3 }
+      ]
+    },
+
+    "Start_SSRI": {
+      "type": "MedicationOrder",
+      "codes": [
+        {
+          "system": "RxNorm",
+          "code": "860975",
+          "display": "Sertraline 50 MG Oral Tablet"
+        }
+      ],
+      "direct_transition": "Close_Encounter"
+    },
+
+    "Close_Encounter": {
+      "type": "EncounterEnd",
+      "direct_transition": "Schedule_Next_Screen"
+    },
+
+    "Terminal": { "type": "Terminal" }
+  }
+}
