@@ -1,0 +1,18 @@
+paths:
+  raw_synthea_dir: data/data-synthea
+  build_output_dir: data/data-build
+  train_output_dir: data/data-train
+  mimic_local_dir: data/mimic-local
+  artifact_dir: /artifacts
+build_features:
+  pdc_window_days: 90
+  max_sequence_days: 128
+prepare_splits:
+  train_split: 0.75
+  val_split: 0.10
+  test_split: 0.15
+  seed: 42
+  dx_adherence_threshold: 0.8
+  phq9_spike: 5.0
+  utilization_spike: 2.0
+  relapse_horizon_days: 30

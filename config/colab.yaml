@@ -1,0 +1,18 @@
+paths:
+  raw_synthea_dir: /content/drive/MyDrive/SymptomTrajectories/synthea
+  build_output_dir: /content/drive/MyDrive/SymptomTrajectories/data-build
+  train_output_dir: /content/drive/MyDrive/SymptomTrajectories/data-train
+  mimic_local_dir: /content/drive/MyDrive/SymptomTrajectories/mimic-local
+  artifact_dir: /content/drive/MyDrive/SymptomTrajectories/artifacts
+build_features:
+  pdc_window_days: 90
+  max_sequence_days: 128
+prepare_splits:
+  train_split: 0.75
+  val_split: 0.10
+  test_split: 0.15
+  seed: 42
+  dx_adherence_threshold: 0.8
+  phq9_spike: 5.0
+  utilization_spike: 2.0
+  relapse_horizon_days: 30
