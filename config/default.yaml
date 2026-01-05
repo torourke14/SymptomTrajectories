@@ -2,7 +2,6 @@ paths:
   raw_synthea_dir: data/data-synthea
   build_output_dir: data/data-build
   train_output_dir: data/data-train
-  mimic_local_dir: data/mimic-local
   artifact_dir: /artifacts
 build_features:
   pdc_window_days: 90
@@ -16,3 +15,6 @@ prepare_splits:
   phq9_spike: 5.0
   utilization_spike: 2.0
   relapse_horizon_days: 30
+# xgb:
+# ltsm:
+# lstt:
