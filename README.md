@@ -1,18 +1,49 @@
-## Requirements
-Running this code requires access to MIMIC-IV data. To get access, you have to complete a certificate course in *Human Research* and *Data or Specimens Research* set by MIT Technology Affiliates. This must be completed and then requested through PhysioNet.
+# Symptom Trajectories
 
-## Datasets
-- MIMIC-IV: This repository utilizes BigQuery to read/write
+End-to-end pipeline for building model-ready train/validation/test splits of time series data from Synthea synthetic data, and modeling mental health symptom trajectories.
 
+## Features
+- Uses the [Synthetic Health Synthetic Data Generator](https://github.com/synthetichealth/synthea/wiki/Basic-Setup-and-Running) to generate a homogenous, normalized dataset.
+- Ingest Synthea CSV/CSV.GZ exports and builds longitudinal feature tables.
+- Derive modeling-ready dataframes and train/val/test splits with configurable thresholds.
+- Predict warning signals for treatment failure in depressed patients over the next 30 days by training a XGBoost, LSTM, or custom LSTM-Transformer fusion model (dubbed a Long Short Term Transformer, LSTT) on the time series data.
 
-## Generating Synthetic Data
-See https://github.com/synthetichealth/synthea/wiki/Developer-Setup-and-Running
-  1. git clone https://github.com/synthetichealth/synthea
-  2. cd synthea
-  3. Ensure (per README) Java SDK v11-v17 is installed
-  4. Under "*data/synthetic/synthea/src/main/resources/synthea.properties*", change *exporter.csv.export* to true
-1. on Windows, run .\gradlew run --args="-p 5000 -d ..\modules --exporter.csv.export=true"
-  - -p 7500 -- sets population size
-  - -d ../modules -- path to folder to add synthetic data as part of creation. For this project, we add synthetic PHQ-9 data from "/modules/phq9/phq9.json" module (included in reference docs)
-  - Files are output under *output/csv* in the repo.
-2. Using 7-Zip, compress (.gz) each of **patients, encounters, conditions, medications, and observations**individually. Upload to path of your liking (This code runs with uploaded to *submission/synthetic-data*)
+## Dependencies
+- conda: `conda env create -f environment.yml`
+- Pip alternative: run `pip install -e .` inside a venv
+
+## Running the pipeline
+1) Generate Synthea data into `data/raw-synthea` (see below)
+2) Build features into `data/build` (see `config/default.yaml`)
+  - `python -m symptom_trajectories.cli build-features`
+3) Prepare splits/training tables
+  - `python -m symptom_trajectories.cli prepare-splits`
+  - train/val/test splits output into `data/modeling`
+4) Train model
+  - XG Boost: `python -m symptom_trajectories.run train-xgb [--config path]`
+  - LSTM: `python -m symptom_trajectories.run train-lstm [--config path]`
+  - fusion LSTM-transformer: `python -m symptom_trajectories.run train-lstt [--config path]`
+
+#### Configuration
+All commands pull from accompanying sections in `config/default.yaml` is loaded automatically. `config/colab.yaml` still being tested. To run with a different file (e.g., Colab paths, model derivations): `python -m symptom_trajectories.cli build-features --config config/colab.yaml`
+
+## Generating Synthea data
+Reference: 
+1) Follow [instructions](https://github.com/synthetichealth/synthea/wiki/Developer-Setup-and-Running) for installing Java 11-17
+2) `cd data/synthea/synthea`. Export properties can be edited in `src/main/resources/synthea.properties`
+3) Run (powershell):
+   - `.\gradlew run --args="-p 10000 -d ..\modules --exporter.csv.export=true"`
+   - Adjust `-p` for population size based on your system
+   - existing files are not overridden by default; make sure to delete files from previous runs in `data/synthea` before running again.
+
+## List of commands
+- `python -m symptom_trajectories.run build-features [--config path] [overrides...]`
+  - Parses raw Synthea CSV/CSV.GZ into feature tables in `data/data-build` by default.
+- `python -m symptom_trajectories.run prepare-splits [--config path] [overrides...]`
+  - Builds model-ready tables and train/val/test splits in `data/data-train` by default.
+- `python -m symptom_trajectories.run train-xgb [--config path]`
+  - Train XGBoost classifier on the data
+- `python -m symptom_trajectories.run train-lstm [--config path]`
+  - Train XGBoost classifier on the data
+- `python -m symptom_trajectories.run train-lstt [--config path]`
+  - Train XGBoost classifier on the data
